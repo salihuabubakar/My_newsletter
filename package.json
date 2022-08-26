@@ -9,8 +9,8 @@
   "author": "Salihu k",
   "license": "ISC",
   "dependencies": {
+    "@mailchimp/mailchimp_marketing": "^3.0.78",
     "body-parser": "^1.20.0",
-    "express": "^4.18.1",
-    "request": "^2.88.2"
+    "express": "^4.18.1"
   }
 }

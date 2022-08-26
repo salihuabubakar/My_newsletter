@@ -1,5 +1,5 @@
 const express = require("express");
-const request = require("request");
+const client = require("@mailchimp/mailchimp_marketing");
 const bodyParser = require("body-parser");
 const port = 3000;
 const {log, error, table} = console;
@@ -17,44 +17,36 @@ app.get("/", (req, res) => {
 
 app.post("/", (req, res) => {
     const {firstName, lastName, email} = req.body;
-    // table([firstName, lastName, email])
-    // res.write(`<h1>${firstName}</h1>`);
-    // res.write(`<h1>${lastName}</h1>`);
-    // res.write(`<h1>${email}</h1>`);
-    const data = {
-      members: [
-        {
-          email_address: email,
-          status: "subscribed",
-          merge_fields: {
-            FNAME: firstName,
-            LNAME: lastName,
+
+    client.setConfig({
+      apiKey: apiKey,
+      server: "us11",
+    });
+
+    const run = async () => {
+      const response = await client.lists.batchListMembers(audienceId, {
+        members: [
+          {
+            email_address: email,
+            status: "subscribed",
+            merge_fields: {
+              FNAME: firstName,
+              LNAME: lastName,
+            },
           },
-        },
-      ],
+        ],
+      });
+        if (response) {
+          res.sendFile(__dirname + "/success.html");
+        }
     };
 
-    const JsonData = JSON.stringify(data)
-    const options = {
-      url: "https://us11.api.mailchimp.com/3.0/lists/3b0b2ad7a6",
-      method: "POST",
-      headers: {
-        "Authorization": `Salihu_k ${apiKey}`
-      },
-      body: JsonData
-    };
-
-    request(options, (error, response, body) => {
+    run().catch(function(error) {
         if(error) {
           res.sendFile(__dirname + "/failure.html");
-        }else {
-            if(response.statusCode == 200) {
-              res.sendFile(__dirname + "/success.html");
-            }else {
-              res.sendFile(__dirname + "/failure.html");
-            }
         }
     })
+    
 })
 
 app.post("/failure", (req, res) => {
@@ -65,19 +57,5 @@ app.listen(process.env.PORT || port, () => {
   log(`Server is running on ${port}`);
 });
 
-// const client = require("mailchimp-marketing");
 
-// client.setConfig({
-//   apiKey: "YOUR_API_KEY",
-//   server: "YOUR_SERVER_PREFIX",
-// });
-
-// const run = async () => {
-//   const response = await client.lists.batchListMembers("list_id", {
-//     members: [{}],
-//   });
-//   console.log(response);
-// };
-
-// run();
 
